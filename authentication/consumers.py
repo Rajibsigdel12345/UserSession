@@ -1,4 +1,5 @@
 # core/consumers.py
+from urllib.parse import parse_qs
 from django.utils import timezone
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -15,38 +16,42 @@ User = get_user_model()
 class LoginManagementConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Extract the token from the query string or headers
-        token = self.scope['query_string'].decode().split('=')[1]
-        
+        query = self.scope['query_string'].decode()
+        query= parse_qs(query)
+        print(query)
+        new_token = query.get('token')[0]
+        user_id = query.get('user_id')[0]
         # Register the connection with the token
-        websocket_manager.add_connection(token, self)
+        websocket_manager.add_connection(new_token, self)
         
         await self.accept()
+
+        if user_id and new_token:
+            await self.check_user_logged_in(user_id,new_token)
         await self.send(text_data=json.dumps({ 'message': 'Connected' }))
+    
+    async def check_user_logged_in(self, user_id,new_token):
+         # Fetch existing token for the user
+        existing_token = await self.get_existing_token(user_id,new_token)
+        
+        if existing_token:
+            # Notify the previous session to log out
+            await websocket_manager.notify_disconnect(existing_token)
+            # Replace the old token with the new one
+            await self.update_token(user_id, new_token)
+            # return
+        else:
+            # Store the new token
+            await self.store_token(user_id, new_token)
+
+        await self.send(text_data=json.dumps({
+            'message': 'Login successful',
+            'new_token': new_token
+        }))
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        user_id = data.get('user_id')
-        new_token = data.get('token')
-        # print(user_id, new_token, "line 26 consumers")
-
-        if user_id and new_token:
-            # Fetch existing token for the user
-            existing_token = await self.get_existing_token(user_id,new_token)
-            
-            if existing_token:
-                # Notify the previous session to log out
-                await websocket_manager.notify_disconnect(existing_token)
-                # Replace the old token with the new one
-                await self.update_token(user_id, new_token)
-                # return
-            else:
-                # Store the new token
-                await self.store_token(user_id, new_token)
-
-            await self.send(text_data=json.dumps({
-                'message': 'Login successful',
-                'new_token': new_token
-            }))
+        await self.send(text_data=json.dumps(data))
 
     async def disconnect(self, close_code):
         # Remove the connection when the user disconnects
@@ -80,4 +85,4 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def store_token(user_id, new_token):
         # Store a new token in the database
-        user = AuthToken.objects.create(user_id=user_id, token=new_token,expires_at=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now())
+        AuthToken.objects.create(user_id=user_id, token=new_token,expires_at=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now())

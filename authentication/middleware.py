@@ -106,7 +106,6 @@ class TokenCleanUPMiddleware(BaseMiddleware):
     def __call__(self, request):
         if (request.path == '/token/' or request.path == '/token/refresh/') and request.method == 'POST':
         # Clean up expired tokens
-            print(time.time(), ' cleaning up')
             AuthToken.objects.filter(expires_at__lt=timezone.now()).delete()
         response = self.get_response(request)
         return response

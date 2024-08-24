@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-+ohp2)ev)^3zpks%rl-*io35q_g2kn7%u3o@jend26vt78iyu2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'authentication',
     'rest_framework',
     'rest_framework.authtoken',
     'channels',
+  
 ]
 AUTH_USER_MODEL = 'authentication.User'
 
@@ -54,18 +56,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'authentication.middleware.TokenCleanUPMiddleware',
     'authentication.middleware.MaxLoginMiddleware',
 ]
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",  # For local development
-    "http://localhost:5500",  # For local development
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1",  # For local development
+#     "http://localhost",  # For local development
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',
     'x-csrftoken',
- 
+
 ]
 
 ROOT_URLCONF = 'UserSession.urls'
@@ -86,7 +90,7 @@ TEMPLATES = [
     },
 ]
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=90),
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=360),
     'Refresh_TOKEN_LIFETIME': timedelta(days=7),
 }
 MAX_ACTIVE_USERS = 2

@@ -10,24 +10,22 @@ from rest_framework.response import Response
 from .models import AuthToken , User
 from django.conf import settings
 from django.utils import timezone
-import asyncio
-import websockets
-import json
-import time
+
 # Create your views here.
 
 class UserLoginView(TokenObtainPairView):
   serializer_class = CustomTokenObtainPairSerializer
   
-  async def send_notification(self, user_id, new_token):
-      async with websockets.connect(f'ws://localhost:8000/ws/user-session/?token={new_token}/') as websocket:
-          await websocket.send(json.dumps({'user_id': user_id, 'token': new_token}))
-          response = await websocket.recv()
+  # async def send_notification(self, user_id, new_token):
+  #     async with websockets.connect(f'ws://localhost:8000/ws/user-session/?token={new_token}/') as websocket:
+  #         await websocket.send(json.dumps({'user_id': user_id, 'token': new_token}))
+  #         response = await websocket.recv()
+  #         print(response, "line 52 views")
   
   def post(self, request, *args, **kwargs):
     response = super().post(request, *args, **kwargs)
     user = User.objects.get(username=request.data['username'])
-    asyncio.run(self.send_notification(user.id, response.data['access']))
+    response.data['user_id'] = user.id
     return response
     
   
