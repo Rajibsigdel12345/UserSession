@@ -47,6 +47,11 @@ INSTALLED_APPS = [
     'chat',
   
 ]
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 AUTH_USER_MODEL = 'authentication.User'
 
 MIDDLEWARE = [

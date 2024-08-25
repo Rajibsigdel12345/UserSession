@@ -6,22 +6,29 @@ class WebSocketManager:
         self.connections = {}
 
     def add_connection(self, token, connection):
-        self.connections[token] = connection
+        if not self.connections.get(token):
+            self.connections[token] = []
+        self.connections[token].append(connection)
 
-    def remove_connection(self, token):
+    def remove_connection(self, token, connection):
         if token in self.connections:
-            del self.connections[token]
+            self.connections[token].pop(connection)
+            connection.close()
 
     async def notify_disconnect(self, token):
-        connection = self.connections.get(token)
-        if connection:
-            await connection.send(text_data=json.dumps({
+        connections = self.connections.get(token)
+        if connections:
+            for connection in connections:
+                await connection.send(text_data=json.dumps({
                 'message': 'logout'
-            }))
+                }))
             # Optionally, close the connection
-            await connection.close()
+                await connection.close()
             # Remove the connection from the manager
-            self.remove_connection(token)
+            del self.connections[token]
+    
+    def __str__(self):
+        return str(self.connections)
 
 # Instantiate a global WebSocketManager
 websocket_manager = WebSocketManager()

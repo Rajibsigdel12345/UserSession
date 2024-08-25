@@ -33,15 +33,17 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
          # Fetch existing token for the user
         existing_token = await self.get_existing_token(user_id,new_token)
         
-        if existing_token:
+        if existing_token != new_token and existing_token:
             # Notify the previous session to log out
             await websocket_manager.notify_disconnect(existing_token)
             # Replace the old token with the new one
             await self.update_token(user_id, new_token)
             # return
-        else:
+        elif existing_token == new_token:
             # Store the new token
-            await self.store_token(user_id, new_token)
+            await self.update_token(user_id, new_token)
+        else:
+            await self.store_token(user_id,new_token)
 
         await self.send(text_data=json.dumps({
             'message': 'Login successful',
@@ -54,9 +56,9 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Remove the connection when the user disconnects
-        print(self.scope, "line 58 consumers")
+        # print(self.)
         token = self.scope['query_string'].decode().split('=')[1]
-        websocket_manager.remove_connection(token)
+        websocket_manager.remove_connection(token,self)
 
 
     @staticmethod
@@ -65,8 +67,6 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         user = AuthToken.objects.filter(user_id=user_id)
         if user.exists():
             user = user.first()
-            # print(user.token, token, "line 56 consumers")
-            # if user.token != token:
             return user.token
         return None
 
@@ -77,7 +77,6 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         # Update the token in the database
         token_record = AuthToken.objects.filter(user_id=user_id).first()
         token_record.token = new_token
-        # print(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
         token_record.expires_at = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now()
         token_record.save()
 
@@ -109,7 +108,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     # Receive message from WebSocket
-    async def receive(self, text_data):
+    async def receive(self, text_data=None,bytes_code=None):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 

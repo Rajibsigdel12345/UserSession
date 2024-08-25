@@ -33,7 +33,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         # print(query_string)
         token = query_string.get('token', [None])[0]
         connection_id= query_string.get('connection_id', [None])[0] 
-        
+        print(connection_id)
         # print(token)
         if token:
             # print("here"
@@ -54,6 +54,10 @@ class JWTAuthMiddleware(BaseMiddleware):
             scope['user'] = AnonymousUser()
 
         # Proceed with the connection if user is authenticated
+        if connection_id:
+            print(scope, type(scope))
+            scope.update({'connection_id': connection_id})
+            # scope.update['url_route'['connection_id']= connection_id
         if scope['user'].is_authenticated:
             return await super().__call__(scope, receive, send)
         else:
@@ -62,8 +66,7 @@ class JWTAuthMiddleware(BaseMiddleware):
                 'type': 'websocket.close',
                 'code': 4001
             })
-        if connection_id:
-            self.scope['url_route']['kwargs']['connection_id']= connection_id
+
 
     async def send_logout_message(self, send):
         await send({
@@ -82,9 +85,9 @@ class JWTAuthMiddleware(BaseMiddleware):
 
 
 class MaxLoginMiddleware(BaseMiddleware):
-    def get_active_user_count(self):
+    def get_active_user_count(self,user):
     # Assuming your AuthToken model has a `user` ForeignKey and an `expires_at` datetime field
-        active_tokens = AuthToken.objects.filter(expires_at__gt=timezone.now()).count()
+        active_tokens = AuthToken.objects.filter(expires_at__gt=timezone.now()).exclude(user__username=user).count()
         return active_tokens
 
     def __init__(self, get_response):
@@ -93,8 +96,9 @@ class MaxLoginMiddleware(BaseMiddleware):
 
     def __call__(self, request):
         # Check if the request is for login
-        if request.path == '/token/' and request.method == 'POST' or request.path == '/token/refresh/':  # Assuming '/api/token/' is your login URL
-            active_user_count = self.get_active_user_count()
+        if request.path == '/api/token/' and request.method == 'POST' or request.path == '/api/token/refresh/':  
+            user = json.loads(request.body.decode('utf-8')).get('username', None)
+            active_user_count = self.get_active_user_count(user)
             print(time.time(), active_user_count)
             if active_user_count >= self.max_active_users:
                 response_data = {'error': 'Maximum number of active users reached'}
@@ -108,7 +112,7 @@ class TokenCleanUPMiddleware(BaseMiddleware):
         self.get_response = get_response
 
     def __call__(self, request):
-        if (request.path == '/token/' or request.path == '/token/refresh/') and request.method == 'POST':
+        if (request.path == '/api/token/' or request.path == '/api/token/refresh/') and request.method == 'POST':
         # Clean up expired tokens
             AuthToken.objects.filter(expires_at__lt=timezone.now()).delete()
         response = self.get_response(request)

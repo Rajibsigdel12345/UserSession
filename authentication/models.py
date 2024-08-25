@@ -1,4 +1,3 @@
-from uuid import uuid4
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
@@ -6,7 +5,7 @@ from django.db import models
 
 # Create your models here.
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, first_name, last_name, password=None):
+    def create_user(self, username:str, email:str, first_name:str, last_name:str, password:str |None =None) -> 'User':
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -21,7 +20,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, first_name, last_name, password):
+    def create_superuser(self, username:str, email :str, first_name :str, last_name :str, password:str)-> 'User':
         user = self.create_user(
             username,
             email,
@@ -55,10 +54,10 @@ class User(AbstractBaseUser):
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
     provider = models.CharField(max_length=100, default='local',choices=(('local','Local'),('google','Google'),('facebook','Facebook'),('twitter','Twitter'),('github','Github'),('linkedin','Linkedin')))
 
-    def has_module_perms(self, app_label):
+    def has_module_perms(self, app_label) ->bool:
         return self.is_superuser
 
-    def has_perm(self, perm, obj=None):
+    def has_perm(self, perm, obj=None)-> bool:
         return self.is_superuser
 
 
@@ -69,12 +68,12 @@ class AuthToken(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.expires_at:
             self.expires_at = timezone.now()+settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.token
+    def __str__(self) -> str:
+        return f"{self.token}"
 
     

@@ -7,6 +7,7 @@ class Connection(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE , related_name='receiver')
     sender = models.ForeignKey(User, on_delete=models.CASCADE , related_name='sender')
     connection_id = models.UUIDField(default=uuid4, editable=False, unique=True)
+    connected = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -18,13 +19,25 @@ class Connection(models.Model):
             )
         ]
     
-    def __str__(self):
-        return self.connection_id
+    def __str__(self) -> str:
+        return f'{self.connection_id}'
+
+class Messages(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='msg_sender')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='msg_receiver')
+    message = models.TextField()
+    connection = models.ForeignKey(Connection, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self)-> str:
+        return f"{self.sender} to {self.receiver}"
 
 class Groups(models.Model):
     name = models.CharField(max_length=100)
+    admin = models.ManyToManyField(User, related_name='admin')
     room_id= models.UUIDField(default=uuid4, editable=False, unique=True)
-    user = models.ManyToManyField(User)
+    user = models.ManyToManyField(User, related_name='user')
     
-    def __str__(self):
-        return self.room_id
+    def __str__(self)-> str:
+        return f"{self.room_id}"

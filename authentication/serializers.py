@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import User
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
-    def get_token(cls, user):
+    def get_token(cls, user:User) ->dict:
         token = super().get_token(user)
         # Add custom claims
         token['username'] = user.username
@@ -16,7 +16,7 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = ['username','email', 'password','first_name','last_name']
         extra_kwargs = {'password': {'write_only': True}}
         
-    def create(self, validated_data):
+    def create(self, validated_data:dict)->User:
         data = {
           'username':validated_data['username'],
           'email':validated_data['email'],

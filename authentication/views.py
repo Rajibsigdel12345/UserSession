@@ -1,4 +1,7 @@
-from rest_framework.request import Request
+# from rest_framework.request import Request
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from rest_framework.request import Request
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import CustomTokenObtainPairSerializer, SignupSerializer 
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -21,7 +24,7 @@ class UserLoginView(TokenObtainPairView):
   #         response = await websocket.recv()
   #         print(response, "line 52 views")
   
-  def post(self, request, *args, **kwargs):
+  def post(self, request:'Request', *args, **kwargs)-> Response:
     response = super().post(request, *args, **kwargs)
     user = User.objects.get(username=request.data['username'])
     response.data['user_id'] = user.id
@@ -31,7 +34,7 @@ class UserLoginView(TokenObtainPairView):
 class UserRefreshView(TokenRefreshView):
   authentication_classes = [JWTAuthentication]
   permission_classes = [IsAuthenticated]
-  def post(self, request: Request, *args, **kwargs) -> Response:
+  def post(self, request: 'Request', *args, **kwargs) -> Response:
     response = super().post(request, *args, **kwargs)
     expires_at = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'] + timezone.now()
     token = AuthToken.objects.get(user = request.user, token = request.auth)
@@ -41,7 +44,7 @@ class UserRefreshView(TokenRefreshView):
     return response
 
 class UserSignupView(APIView):
-  def post(self, request):
+  def post(self, request: 'Request')->Response:
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
       serializer.save()
