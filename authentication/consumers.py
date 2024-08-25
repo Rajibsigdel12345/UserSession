@@ -18,7 +18,6 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         # Extract the token from the query string or headers
         query = self.scope['query_string'].decode()
         query= parse_qs(query)
-        print(query)
         new_token = query.get('token')[0]
         user_id = query.get('user_id')[0]
         # Register the connection with the token
@@ -55,6 +54,7 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Remove the connection when the user disconnects
+        print(self.scope, "line 58 consumers")
         token = self.scope['query_string'].decode().split('=')[1]
         websocket_manager.remove_connection(token)
 
@@ -86,3 +86,48 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
     def store_token(user_id, new_token):
         # Store a new token in the database
         AuthToken.objects.create(user_id=user_id, token=new_token,expires_at=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now())
+        
+
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_name = self.scope['url_route']['kwargs']['connection_id']
+        self.room_group_name = 'chat_%s' % self.room_name
+
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': message,
+                'user': self.scope['user']
+            }
+        )
+
+    # Receive message from room group
+    async def chat_message(self, event):
+        message = event['message']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))

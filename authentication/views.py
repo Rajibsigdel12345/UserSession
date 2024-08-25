@@ -1,13 +1,12 @@
-from urllib.parse import urlencode
 from rest_framework.request import Request
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import CustomTokenObtainPairSerializer, SignupSerializer
+from .serializers import CustomTokenObtainPairSerializer, SignupSerializer 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from .models import AuthToken , User
+from .models import AuthToken , User 
 from django.conf import settings
 from django.utils import timezone
 
@@ -50,16 +49,4 @@ class UserSignupView(APIView):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
 
-# async def event_stream():
-#     i = 0
-#     while True:
-#         i +=  2
-#         # Wait for new notifications
-#         time.sleep(2)
-#         yield f'data: {i}\n\n'
-# def println(request):
-#     print("hello")
 
-# def stream_notifications(request):
-#     print(request.path)
-#     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')

@@ -1,7 +1,9 @@
+from uuid import uuid4
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.db import models
+
 # Create your models here.
 class UserManager(BaseUserManager):
     def create_user(self, username, email, first_name, last_name, password=None):
@@ -74,5 +76,5 @@ class AuthToken(models.Model):
 
     def __str__(self):
         return self.token
-    
+
     

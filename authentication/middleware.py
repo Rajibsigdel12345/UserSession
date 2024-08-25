@@ -32,6 +32,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         query_string = parse_qs(scope["query_string"].decode())
         # print(query_string)
         token = query_string.get('token', [None])[0]
+        connection_id= query_string.get('connection_id', [None])[0] 
         
         # print(token)
         if token:
@@ -61,6 +62,9 @@ class JWTAuthMiddleware(BaseMiddleware):
                 'type': 'websocket.close',
                 'code': 4001
             })
+        if connection_id:
+            self.scope['url_route']['kwargs']['connection_id']= connection_id
+
     async def send_logout_message(self, send):
         await send({
             'type': 'websocket.send',

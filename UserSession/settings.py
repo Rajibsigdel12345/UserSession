@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'channels',
+    'chat',
   
 ]
 AUTH_USER_MODEL = 'authentication.User'
@@ -90,7 +91,7 @@ TEMPLATES = [
     },
 ]
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=360),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
     'Refresh_TOKEN_LIFETIME': timedelta(days=7),
 }
 MAX_ACTIVE_USERS = 2
