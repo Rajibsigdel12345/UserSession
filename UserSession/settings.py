@@ -99,7 +99,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
     'Refresh_TOKEN_LIFETIME': timedelta(days=7),
 }
-MAX_ACTIVE_USERS = 2
+MAX_ACTIVE_USERS = 3
 
 ASGI_APPLICATION = 'UserSession.asgi.application'
 

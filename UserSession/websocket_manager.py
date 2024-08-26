@@ -1,9 +1,11 @@
 # core/websocket_manager.py
 import json
+
+from authentication.consumers import LoginManagementConsumer
 class WebSocketManager:
     def __init__(self):
         # Dictionary to store the mapping of tokens to WebSocket connections
-        self.connections = {}
+        self.connections :dict[str:list[LoginManagementConsumer]] = {}
 
     def add_connection(self, token, connection):
         if not self.connections.get(token):
@@ -15,7 +17,7 @@ class WebSocketManager:
             self.connections[token].pop(connection)
             connection.close()
 
-    async def notify_disconnect(self, token):
+    async def notify_disconnect(self, token:str):
         connections = self.connections.get(token)
         if connections:
             for connection in connections:

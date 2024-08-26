@@ -95,9 +95,16 @@ class MessageView(APIView):
     
     def get(self, request:'Request')->Response:
       params = request.query_params.get('connection_id',None)
+      if_connected = Q(connection__receiver = request.user)|Q(connection__sender = request.user)
       queryset = Messages.objects.filter(
-        Q(connection__receiver = request.user)
-      | Q(connection__sender = request.user),connection__connection_id = params).exclude(Q(delete_for_self = True), author = request.user).exclude(Q(delete_for_all = True))
+        if_connected
+      ,connection__connection_id = params
+        ).exclude(
+          (Q(delete_for_author = True)&Q(author= request.user))|
+          (Q(delete_for_receiver = True)& ~Q( author= request.user))
+            ).exclude(
+              Q(delete_for_all = True)
+            )
       serializer = self.get_serializer(queryset, many=True)
       return Response(serializer.data)
         
@@ -116,4 +123,5 @@ class MessageView(APIView):
       if serializer.is_valid(raise_exception=True):
         validated_data = serializer.validated_data
         serializer.delete(instance,validated_data)
+        # serializer.save()
       return Response(status=status.HTTP_204_NO_CONTENT)

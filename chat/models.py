@@ -28,7 +28,8 @@ class Messages(models.Model):
     connection = models.ForeignKey(Connection, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    delete_for_self = models.BooleanField(default=False)
+    delete_for_author = models.BooleanField(default=False)
+    delete_for_receiver = models.BooleanField(default=False)
     delete_for_all = models.BooleanField(default=False)
     
     def __str__(self)-> str:

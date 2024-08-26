@@ -5,13 +5,44 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
 from .models import AuthToken
-from UserSession.websocket_manager import websocket_manager  # Import the WebSocket manager
 from .models import AuthToken# Import your JWT token model
 from asgiref.sync import sync_to_async
 from django.conf import settings
 # import time
 
 User = get_user_model()
+class WebSocketManager:
+    def __init__(self):
+        # Dictionary to store the mapping of tokens to WebSocket connections
+        self.connections :dict[str:list[LoginManagementConsumer]] = {}
+
+    def add_connection(self, token, connection):
+        if not self.connections.get(token):
+            self.connections[token] = []
+        self.connections[token].append(connection)
+
+    def remove_connection(self, token, connection):
+        if token in self.connections:
+            self.connections[token].remove(connection)
+            # await connection.close()
+            print(connection, "closed")
+
+    async def notify_disconnect(self, token:str):
+        connections = self.connections.get(token)
+        if connections:
+            for connection in connections:
+                await connection.send(text_data=json.dumps({
+                'message': 'logout'
+                }))
+            # Optionally, close the connection
+                await connection.close()
+            # Remove the connection from the manager
+            del self.connections[token]
+    
+    def __str__(self):
+        return str(self.connections)
+
+websocket_manager = WebSocketManager()
 
 class LoginManagementConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -35,13 +66,15 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         
         if existing_token != new_token and existing_token:
             # Notify the previous session to log out
+            print(existing_token)
             await websocket_manager.notify_disconnect(existing_token)
             # Replace the old token with the new one
             await self.update_token(user_id, new_token)
             # return
         elif existing_token == new_token:
             # Store the new token
-            await self.update_token(user_id, new_token)
+            # await self.update_token(user_id, new_token)
+            pass
         else:
             await self.store_token(user_id,new_token)
 
@@ -56,8 +89,9 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Remove the connection when the user disconnects
-        # print(self.)
-        token = self.scope['query_string'].decode().split('=')[1]
+        query = self.scope['query_string'].decode()
+        query= parse_qs(query)
+        token = query.get('token')[0]
         websocket_manager.remove_connection(token,self)
 
 
@@ -86,47 +120,3 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         # Store a new token in the database
         AuthToken.objects.create(user_id=user_id, token=new_token,expires_at=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now())
         
-
-class ChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['connection_id']
-        self.room_group_name = 'chat_%s' % self.room_name
-
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    # Receive message from WebSocket
-    async def receive(self, text_data=None,bytes_code=None):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'user': self.scope['user']
-            }
-        )
-
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event['message']
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': message
-        }))
