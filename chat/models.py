@@ -23,12 +23,13 @@ class Connection(models.Model):
         return f'{self.connection_id}'
 
 class Messages(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='msg_sender')
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='msg_receiver')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='msg_author')
     message = models.TextField()
     connection = models.ForeignKey(Connection, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    delete_for_self = models.BooleanField(default=False)
+    delete_for_all = models.BooleanField(default=False)
     
     def __str__(self)-> str:
         return f"{self.sender} to {self.receiver}"

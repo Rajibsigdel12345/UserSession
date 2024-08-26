@@ -59,6 +59,15 @@ class User(AbstractBaseUser):
 
     def has_perm(self, perm, obj=None)-> bool:
         return self.is_superuser
+    
+    def to_dict(self):
+        return{
+            'id':self.id,
+            'username':self.username,
+            'email':self.email,
+            'first_name':self.first_name,
+            'last_name':self.last_name,
+        }
 
 
 class AuthToken(models.Model):

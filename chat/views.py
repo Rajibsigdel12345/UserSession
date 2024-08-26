@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ConnectionSerializer, GroupConnectionSerializer
-from .models import Groups , Connection
+from .serializers import ConnectionSerializer, GroupConnectionSerializer , MessageSerializer , MessageReadSerializer
+from .models import Groups , Connection, Messages
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -76,3 +76,44 @@ class GroupConnectionView(APIView):
       serializer.save()
       return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+class MessageView(APIView):
+    serializer_class = {
+      'read':MessageReadSerializer,
+      'write':MessageSerializer
+      }
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer(self, *args, **kwargs)->MessageSerializer|MessageReadSerializer:
+      if self.request.method == 'GET':
+        return self.serializer_class['read'](*args,**kwargs)
+      return self.serializer_class['write'](*args,**kwargs)
+    
+    def get_object(self,request:'Request', pk:int)->Messages:
+      return get_object_or_404(Messages, pk=pk)
+    
+    def get(self, request:'Request')->Response:
+      params = request.query_params.get('connection_id',None)
+      queryset = Messages.objects.filter(
+        Q(connection__receiver = request.user)
+      | Q(connection__sender = request.user),connection__connection_id = params).exclude(Q(delete_for_self = True), author = request.user).exclude(Q(delete_for_all = True))
+      serializer = self.get_serializer(queryset, many=True)
+      return Response(serializer.data)
+        
+    def put(self, request:'Request', pk:int)->Response:
+      instance = self.get_object(request, pk)
+      serializer = self.get_serializer(instance = instance, data=request.data, partial = True, context={'user':request.user})
+      if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request:'Request', pk:int)->Response:
+      instance = self.get_object(request, pk)
+      data = request.data
+      serializer = self.get_serializer(instance = instance, data = data,partial=True, context = {'user':request.user})
+      if serializer.is_valid(raise_exception=True):
+        validated_data = serializer.validated_data
+        serializer.delete(instance,validated_data)
+      return Response(status=status.HTTP_204_NO_CONTENT)
