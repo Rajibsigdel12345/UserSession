@@ -1,3 +1,4 @@
+from multiprocessing import context
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from rest_framework.request import Request
@@ -29,7 +30,7 @@ class ConnectionView(APIView):
     
   def get(self, request :'Request')->Response:
     queryset = self.get_object(request)
-    serializer = self.serializer_class(queryset, many=True)
+    serializer = self.serializer_class(queryset, many=True,context={'user':request.user})
     return Response(serializer.data)
   
   def post(self, request:'Request')->Response:

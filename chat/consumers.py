@@ -1,8 +1,9 @@
 import json
-from pyexpat.errors import messages
-import re
+import time
 
 from django.db.models import Q
+from django.utils import timezone
+from django.contrib.humanize.templatetags.humanize import intcomma, naturaltime, naturalday
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
@@ -49,7 +50,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         user = self.scope['user']
-       
+        time = timezone.now()
+        timestamp = f"{naturaltime(time)}  {naturalday(time,format='%b %d')}"
         await self.write_messages(message, user, self.connection_id)
         # Send message to room group
         await self.channel_layer.group_send(
@@ -57,18 +59,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message,
-                'user': self.scope['user'].username
+                'author': user.to_dict(),
+                'created_at': timestamp,
+                'updated_at': timestamp
+                
             }
         )
 
     # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
-        user = event['user']
+        author = event['author']
+        timestamp = {
+            'created_at': event['created_at'],
+            'updated_at': event['updated_at']
+        }
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
-            'user':user
+            'author':author,
+            **timestamp
         }))
     
     @sync_to_async
