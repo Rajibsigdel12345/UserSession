@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  /* Container for the loading skeleton */
+.skeleton-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* General skeleton style */
+.skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.skeleton-avatar, .skeleton-text {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    animation: shimmer 1.5s infinite linear;
+}
+
+/* Avatar placeholder */
+.skeleton-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+/* Line placeholders for text */
+.skeleton-text {
+    height: 15px;
+    width: 100%;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-text.medium {
+    width: 80%;
+}
+
+.skeleton-text.long {
+    width: 90%;
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: 200px 0;
+    }
+}
+
+/* Applying the shimmer effect */
+.skeleton-avatar, .skeleton-text {
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background-size: 400% 100%;
+}
+</style>
+
+<body>
+    <div class="skeleton-wrapper">
+        <div class="skeleton">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-text short"></div>
+            <div class="skeleton-text medium"></div>
+            <div class="skeleton-text long"></div>
+            <div class="skeleton-text long"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,6 +2,7 @@ import { getConnection,socketLogin,connectChat,getMessages } from "./module.mjs"
 import ChatHeader from "../component/ChatHeader.js";
 import MessageList from "../component/MessageList.js";
 import FriendList from "../component/FriendList.js";
+import Loader from "../component/Loader.js";
 
 const render = async (connection) => {
   
@@ -10,13 +11,13 @@ const render = async (connection) => {
   const chat_header = document.getElementById('chat-header');
   chat_header.innerHTML = ChatHeader(default_friend);
 
-  const messages = await getMessages(default_friend.connection_id);
+  
   const message_list = document.getElementById('message-list');
+  const messages = await getMessages(default_friend.connection_id);
   message_list.innerHTML = '';
   messages.forEach((message) => {
     message_list.innerHTML += MessageList(message);
   });
-  message_list.scrollTop = -message_list.scrollHeight;
   // document.getElementById('message-list').scrollTop = document.getElementById('message-list').scrollHeight;
   document.getElementById(`${default_friend.connection_id}`).classList.add('active');
 
@@ -30,17 +31,24 @@ const getChatSocket = async (connection) => {
 }
 
 async function main(){
+  const friend_list = document.getElementById('friend-list');
+  friend_list.innerHTML = Loader();
+  const message_list = document.getElementById('message-list');
+  message_list.innerHTML = Loader();
+
   await socketLogin(localStorage.getItem('access_token'));
+
   const connection = await getConnection();
   sessionStorage.setItem('active_connection',JSON.stringify(connection[0]));
- 
-  const friend_list = document.getElementById('friend-list');
+  friend_list.innerHTML = '';
   connection.forEach((connection) => {
     friend_list.innerHTML += FriendList(connection);
   });
 
   // console.log(active_connection);
+
   await render(connection[0]);
+  message_list.scrollTop = message_list.scrollHeight;
   
   document.querySelectorAll('.user-list').forEach((element) => {
     element.addEventListener('click', async (event) => {
@@ -50,6 +58,7 @@ async function main(){
       document.getElementById(`${previous_connection}`).classList.remove('active');
       sessionStorage.setItem('active_connection',JSON.stringify(active_connection));
       await render(active_connection);
+      message_list.scrollTop = message_list.scrollHeight;
     });
   });
   
