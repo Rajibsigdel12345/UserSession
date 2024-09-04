@@ -3,7 +3,8 @@ import time
 
 from django.db.models import Q
 from django.utils import timezone
-from django.contrib.humanize.templatetags.humanize import intcomma, naturaltime, naturalday
+from django.contrib.humanize.templatetags.humanize import  naturalday
+from .utils import custom_naturaltime as naturaltime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
@@ -51,7 +52,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json['message']
         user = self.scope['user']
         time = timezone.now()
-        timestamp = f"{naturaltime(time)}  {naturalday(time,format='%b %d')}"
+        timestamp = f"{naturaltime(time)}  {naturalday(time)}"
         await self.write_messages(message, user, self.connection_id)
         # Send message to room group
         await self.channel_layer.group_send(

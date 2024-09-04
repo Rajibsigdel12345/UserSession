@@ -50,7 +50,8 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         query = self.scope['query_string'].decode()
         query= parse_qs(query)
         new_token = query.get('token')[0]
-        user_id = query.get('user_id')[0]
+        user_id = self.scope['user'].id
+        print(self.scope['user'], user_id, "inside connect")
         # Register the connection with the token
         websocket_manager.add_connection(new_token, self)
         
