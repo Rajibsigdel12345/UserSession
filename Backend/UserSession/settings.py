@@ -61,25 +61,25 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'authentication.middleware.TokenCleanUPMiddleware',
     'authentication.middleware.MaxLoginMiddleware',
 ]
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1",  # For local development
-    "http://localhost",  # For local development
+CORS_ALLOWED_ORIGINS = [  # For local development
+    "http://127.0.0.1:5500",  # For local development
+    "http://localhost:5500",  # For local development
 ]
 # CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_HEADERS = [
-    'content-type',
-    'authorization',
-    'x-csrftoken',
+# CORS_ALLOW_HEADERS = [
+#     'Content-type',
+#     'Authorization',
+#     'X-csrftoken',
 
-]
+# ]
 
 ROOT_URLCONF = 'UserSession.urls'
 
