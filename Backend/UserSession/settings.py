@@ -72,8 +72,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [  # For local development
     "http://127.0.0.1:5500",  # For local development
     "http://localhost:5500", # For local development
-    "https://main--chatrajib.netlify.app/",
-    "https://chatrajib.netlify.app/"
+    "https://main--chatrajib.netlify.app",
+    "https://chatrajib.netlify.app"
 ]
 # CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_HEADERS = [
