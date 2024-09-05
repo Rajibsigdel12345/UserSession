@@ -1,8 +1,7 @@
-import MessageList from "../component/MessageList.js";
 import * as constant from "./constant.js";
 
 export const getConnection = async () => {
-  const response = await fetch('http://localhost:8000/api/chat/add-connection/', {
+  const response = await fetch(`${constant.CONNECTION}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -17,7 +16,7 @@ export const getConnection = async () => {
 };
 
 export const getMessages = async (connection_id) => {
-  const response = await fetch(`${constant.base_url}api/chat/message/?connection_id=${connection_id}`, {
+  const response = await fetch(`${constant.MESSAGE}?connection_id=${connection_id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -29,7 +28,7 @@ export const getMessages = async (connection_id) => {
 
 export const connectChat = async (connection_id,token) => {
   const chatSocket = new WebSocket(
-    `${constant.ws_url}ws/chat/?token=${token}&connection_id=${connection_id}`);
+    `${constant.SOCKET_CHAT}?token=${token}&connection_id=${connection_id}`);
   chatSocket.onopen = function(e) {
     console.log('Connected to chat socket');
   };
@@ -39,11 +38,42 @@ export const connectChat = async (connection_id,token) => {
 export const socketLogin = async (token) => {
   const user_id = parseInt(sessionStorage.getItem('user_id',1));
   const loginSocket = new WebSocket(
-    `${constant.ws_url}/ws/user-session/?token=${token}&user_id=${user_id}`);
+    `${constant.SOCKET_LOGIN}?token=${token}&user_id=${user_id}`);
 loginSocket.onclose = function(e) {
     localStorage.removeItem('access_token');
     sessionStorage.removeItem('user_id');
-    window.location.href = `home.html`;
+    window.location.href = `login.html`;
 };
 }
 
+export const fetchUser = async (username, password) => {
+  const response = await fetch(`${constant.LOGIN}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  });
+  if (response.status === 401) {
+    alert('Invalid username or password');
+    return null;
+  }
+  if (response.status === 403) {
+    alert('maximum users exceeded');
+    return null;
+  }
+  return response.json();
+}
+
+export const verifyToken = (token) => {
+  const response = fetch(`${constant.VERIFY_TOKEN}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  }).then(response => {
+    return response.status === 200;
+  });
+  return response;
+}

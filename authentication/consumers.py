@@ -93,6 +93,8 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         query = self.scope['query_string'].decode()
         query= parse_qs(query)
         token = query.get('token')[0]
+        # await self.remove_token(self.scope['user'], token)
+        
         websocket_manager.remove_connection(token,self)
 
 
@@ -120,4 +122,10 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
     def store_token(user_id, new_token):
         # Store a new token in the database
         AuthToken.objects.create(user_id=user_id, token=new_token,expires_at=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']+timezone.now())
+    
+    @staticmethod
+    @sync_to_async
+    def remove_token(user, token):
+        # Remove the token from the database
+        AuthToken.objects.filter(user=user, token=token).delete()
         
