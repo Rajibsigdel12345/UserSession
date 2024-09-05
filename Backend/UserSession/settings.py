@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,11 +69,11 @@ MIDDLEWARE = [
     'authentication.middleware.TokenCleanUPMiddleware',
     'authentication.middleware.MaxLoginMiddleware',
 ]
-# CORS_ALLOWED_ORIGINS = [
-#     "http://127.0.0.1",  # For local development
-#     "http://localhost",  # For local development
-# ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1",  # For local development
+    "http://localhost",  # For local development
+]
+# CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',
