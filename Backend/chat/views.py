@@ -134,4 +134,4 @@ class UserListView(APIView):
     users = User.objects.all().exclude(id = reqeust.user.id)
     connection = Connection.objects.filter(Q(sender = reqeust.user)|Q(receiver = reqeust.user))
     users = [user.to_dict() for user in users if not connection.filter(Q(sender = user)|Q(receiver = user)).exists()]
-    return Response({'users': users}, status=status.HTTP_200_OK)
+    return Response(users, status=status.HTTP_200_OK)
