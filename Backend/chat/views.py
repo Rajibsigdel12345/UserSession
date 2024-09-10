@@ -36,7 +36,7 @@ class ConnectionView(APIView):
   def post(self, request:'Request')->Response:
     data  =request.data
     data['sender'] = request.user.id
-    serializer = self.serializer_class(data = data)
+    serializer = self.serializer_class(data = data, context={'user':request.user})
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data, status=status.HTTP_201_CREATED)

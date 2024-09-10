@@ -116,6 +116,7 @@ export const fetchUserList = async () => {
 }
 
 export const addFriend = async (data) => {
+  console.log(data)
   const response = await fetch(`${constant.CONNECTION}`, {
     method: 'POST',
     headers: {

@@ -103,7 +103,11 @@ async function main(){
   add_friend.forEach((element) => {
     element.addEventListener('click', async (event) => {
       const friend_id = event.target.getAttribute('data-friend-id');
-      await addFriend(friend_id);
+      const data = {
+        sender: parseInt(sessionStorage.getItem('user_id')),
+        receiver: parseInt(friend_id)
+      }
+      await addFriend(data);
     });
   });
 
