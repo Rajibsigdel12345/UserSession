@@ -1,4 +1,3 @@
-from multiprocessing import context
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from rest_framework.request import Request
@@ -9,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ConnectionSerializer, GroupConnectionSerializer , MessageSerializer , MessageReadSerializer
 from .models import Groups , Connection, Messages
+from authentication.models import User
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -126,3 +126,12 @@ class MessageView(APIView):
         serializer.delete(instance,validated_data)
         # serializer.save()
       return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class UserListView(APIView):
+  authentication_classes = [JWTAuthentication]
+  permission_classes = [IsAuthenticated]
+  def get(self, reqeust: 'Request')->Response:
+    users = User.objects.all().exclude(id = reqeust.user.id)
+    connection = Connection.objects.filter(Q(sender = reqeust.user)|Q(receiver = reqeust.user))
+    users = [user.to_dict() for user in users if not connection.filter(Q(sender = user)|Q(receiver = user)).exists()]
+    return Response({'users': users}, status=status.HTTP_200_OK)

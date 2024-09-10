@@ -66,4 +66,7 @@ class UserSignupView(APIView):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
 
-
+class UserListView(APIView):
+  def get(self, reqeust: 'Request')->Response:
+    users = User.objects.all()
+    return Response({'users': users}, status=status.HTTP_200_OK)

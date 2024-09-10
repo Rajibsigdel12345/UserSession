@@ -64,6 +64,24 @@ export const fetchUser = async (username, password) => {
   }
   return response.json();
 }
+export const signUp = async (userInfo) => {
+  const response = await fetch(`${constant.SIGNUP}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userInfo)
+  });
+  if (response.status === 401) {
+    alert('Invalid username or password');
+    return null;
+  }
+  if (response.status === 403) {
+    alert('maximum users exceeded');
+    return null;
+  }
+  return response.json();
+}
 
 export const verifyToken = (token) => {
   const response = fetch(`${constant.VERIFY_TOKEN}`, {

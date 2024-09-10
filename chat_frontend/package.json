@@ -1,0 +1,13 @@
+{
+  "name": "chat_frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+ "scripts": {
+    "start": "parcel ./*.html",
+    "build": "parcel build ./*.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

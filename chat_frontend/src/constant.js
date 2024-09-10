@@ -4,6 +4,7 @@ export const MESSAGE = 'https://usersession-1.onrender.com/api/chat/message/';
 export const CONNECTION = 'https://usersession-1.onrender.com/api/chat/add-connection/';
 export const SOCKET_LOGIN = 'wss://usersession-1.onrender.com/ws/user-session/';
 export const SOCKET_CHAT = 'wss://usersession-1.onrender.com/ws/chat/';
+export const SIGNUP = 'https://usersession-1.onrender.com/api/token/signup/';
 // export const VERIFY_TOKEN = 'http://localhost:8000/api/token/verify/';
 // export const LOGIN = 'http://localhost:8000/api/token/';
 // export const MESSAGE = 'http://localhost:8000/api/chat/message/';

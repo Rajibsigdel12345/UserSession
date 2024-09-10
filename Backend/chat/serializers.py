@@ -2,6 +2,8 @@ from datetime import timedelta
 from django.contrib.humanize.templatetags.humanize import naturalday
 from django.utils import timezone 
 from rest_framework import serializers
+
+from authentication.models import User
 from .models import Connection, Groups , Messages, GroupMembers
 from .utils import custom_naturaltime as naturaltime
 
