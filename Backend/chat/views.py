@@ -19,9 +19,14 @@ class ConnectionView(APIView):
   authentication_classes = [JWTAuthentication]
   permission_classes = [IsAuthenticated]
   
-  def get_object(self,request :'Request',pk: int| None =None)->Connection| list[Connection]:
+  def get_object(self,request :'Request',pending :bool = None,pk: int| None =None)->Connection| list[Connection]:
+    if pending != None:
+      if pending == 'true':
+        return Connection.objects.filter(sender = request.user, connected = False)
+      if pending == 'false':
+        return Connection.objects.filter(receiver = request.user, connected = False)
     if request.method == 'GET':
-      return Connection.objects.filter(Q(sender = request.user) | Q(receiver = request.user))
+      return Connection.objects.filter(Q(sender = request.user) | Q(receiver = request.user), connected = True)
     if request.method == "PUT" and pk:
       return Connection.objects.get(receiver = request.user, id = pk)
     if request.method == "DELETE" and pk:
@@ -29,7 +34,9 @@ class ConnectionView(APIView):
     raise Http404("Invalid Request")
     
   def get(self, request :'Request')->Response:
-    queryset = self.get_object(request)
+    pending = request.query_params.get('pending')
+    print(pending)
+    queryset = self.get_object(request,pending)
     serializer = self.serializer_class(queryset, many=True,context={'user':request.user})
     return Response(serializer.data)
   
@@ -43,7 +50,7 @@ class ConnectionView(APIView):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
   def put(self, request:'Request', pk:int)->Response:
-    instance = self.get_object(request, pk)
+    instance = self.get_object(request, pk=pk)
     if instance.connected:
       return Response({"message":"Connection already established"}, status=status.HTTP_400_BAD_REQUEST)
     serializer = self.serializer_class(instance = instance, data=request.data, partial = True)

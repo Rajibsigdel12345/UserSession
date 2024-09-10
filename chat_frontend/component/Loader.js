@@ -1,4 +1,4 @@
-const loader = () => {
+const Loader = () => {
   return `<div class="loader">
   <div class="bar1"></div>
   <div class="bar2"></div>
@@ -9,4 +9,4 @@ const loader = () => {
 </div>`;
 };
 
-export default loader;
+export default Loader;

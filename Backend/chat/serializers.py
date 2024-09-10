@@ -15,8 +15,8 @@ class ConnectionSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
             'friend_info': {'read_only': True}, 
-            'sender': {'write_only': True},
-            'receiver': {'write_only': True},
+            # 'sender': {'write_only': True},
+            # 'receiver': {'write_only': True},
             
                         }
     def get_friend_info(self, obj)->dict:

@@ -129,9 +129,66 @@ export const addFriend = async (data) => {
     alert('Please login to continue');
     window.location.href = 'login.html';
   }
+  else if (response.status != 201){
+    alert('Something went wrong');
+    return {};
+  }
+  return response.json();
+}
+
+export const pendingRequest = async (pending) => {
+  const response = await fetch(`${constant.CONNECTION}?pending=${pending}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    }
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue');
+    window.location.href = 'login.html';
+  }
   else if (response.status != 200){
     alert('Something went wrong');
     return {};
   }
   return response.json();
+}
+
+export const acceptRequest = async (id) => {
+  const response = await fetch(`${constant.CONNECTION}${id}/`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    },
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue');
+    window.location.href = 'login.html';
+  }
+  else if (response.status != 200){
+    alert('Something went wrong');
+    return {};
+  }
+  return response.json();
+}
+
+export const cancelRequest = async (id) => {
+  const response = await fetch(`${constant.CONNECTION}${id}/`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    },
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue');
+    window.location.href = 'login.html';
+  }
+  else if (response.status != 204){
+    alert('Something went wrong');
+    return {};
+  }
+  return ;
 }

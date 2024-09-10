@@ -33,7 +33,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         # print(query_string)
         token = query_string.get('token', [None])[0]
         connection_id= query_string.get('connection_id', [None])[0] 
-        print(connection_id)
+        # print(connection_id)
         # print(token)
         if token:
             # print("here"
@@ -55,7 +55,7 @@ class JWTAuthMiddleware(BaseMiddleware):
 
         # Proceed with the connection if user is authenticated
         if connection_id:
-            print(scope, type(scope))
+            # print(scope, type(scope))
             scope.update({'connection_id': connection_id})
             # scope.update['url_route'['connection_id']= connection_id
         if scope['user'].is_authenticated:
@@ -99,7 +99,7 @@ class MaxLoginMiddleware(BaseMiddleware):
         if request.path == '/api/token/' and request.method == 'POST' or request.path == '/api/token/refresh/':  
             user = json.loads(request.body.decode('utf-8')).get('username', None)
             active_user_count = self.get_active_user_count(user)
-            print(time.time(), active_user_count)
+            # print(time.time(), active_user_count)
             if active_user_count >= self.max_active_users:
                 response_data = {'error': 'Maximum number of active users reached'}
                 return JsonResponse(response_data, safe=False, status=403)

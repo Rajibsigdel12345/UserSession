@@ -25,7 +25,7 @@ class WebSocketManager:
         if token in self.connections:
             self.connections[token].remove(connection)
             # await connection.close()
-            print(connection, "closed")
+            # print(connection, "closed")
 
     async def notify_disconnect(self, token:str):
         connections = self.connections.get(token)
@@ -51,7 +51,7 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         query= parse_qs(query)
         new_token = query.get('token')[0]
         user_id = self.scope['user'].id
-        print(self.scope['user'], user_id, "inside connect")
+        # print(self.scope['user'], user_id, "inside connect")
         # Register the connection with the token
         websocket_manager.add_connection(new_token, self)
         
@@ -67,7 +67,7 @@ class LoginManagementConsumer(AsyncWebsocketConsumer):
         
         if existing_token != new_token and existing_token:
             # Notify the previous session to log out
-            print(existing_token)
+            # print(existing_token)
             await websocket_manager.notify_disconnect(existing_token)
             # Replace the old token with the new one
             await self.update_token(user_id, new_token)

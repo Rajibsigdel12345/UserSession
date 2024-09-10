@@ -22,7 +22,7 @@ class UserVerifyView(APIView):
     return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
   
   def delete(self, request: 'Request',logout)->Response:
-    print(request.auth)
+    # print(request.auth)
     token = AuthToken.objects.filter(user = request.user, token = request.auth)
     if not token.exists():
       return Response({'message': 'Token is not valid'}, status=status.HTTP_400_BAD_REQUEST)

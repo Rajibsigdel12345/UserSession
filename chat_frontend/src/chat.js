@@ -1,12 +1,13 @@
-import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend } from "./module.mjs";
+import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend, pendingRequest, acceptRequest,cancelRequest } from "./module.mjs";
 import ChatHeader from "../component/ChatHeader.js";
 import MessageList from "../component/MessageList.js";
 import FriendList from "../component/FriendList.js";
 import Loader from "../component/Loader.js";
 import UserList from "../component/UserList.js";
+import PendingRequest from "../component/PendingRequest.js";
 
 const render = async (connection) => {
-  
+  console.log(sessionStorage.getItem('active_connection'));
   const default_friend = JSON.stringify(sessionStorage.getItem('active_connection')) ? JSON.parse(sessionStorage.getItem('active_connection')) : connection;
   
   const chat_header = document.getElementById('chat-header');
@@ -35,30 +36,71 @@ async function main(){
   // if (!verifyToken(localStorage.getItem('access_token'))){
   //   window.location.href = 'login.html';
   // }
+  const default_connection = sessionStorage.getItem('active_connection');
   const friend_list = document.getElementById('friend-list');
   friend_list.innerHTML = Loader();
   const message_list = document.getElementById('message-list');
   message_list.innerHTML = Loader();
+  const pending_user_list = document.getElementById('pending-user-list');
+  pending_user_list.innerHTML = Loader();
 
   await socketLogin(localStorage.getItem('access_token'));
   const connection = await getConnection();
-  if(JSON.parse(sessionStorage.getItem('active_connection')) === null){
+  if(default_connection === null || default_connection === "undefined" ||default_connection === 'null'){
   sessionStorage.setItem('active_connection',JSON.stringify(connection[0]));
   }
+  console.log(sessionStorage.getItem('active_connection'));
   friend_list.innerHTML = '';
   connection.forEach((connection) => {
     friend_list.innerHTML += FriendList(connection);
   });
   const user_list = document.getElementById('user-list');
   const users = await fetchUserList();
-
+  
+  let received_reqeust_list = await pendingRequest(false);
+  let sent_request_list = await pendingRequest(true);
+  // pending_list = pending_list.filter((list) => list.sender !== parseInt(sessionStorage.getItem('user_id')));
+  pending_user_list.innerHTML = '';
+  
   if( users.length>0 ){
     users.forEach((user) => {
       user_list.innerHTML += UserList(user);
     });
   }
+  
+  if (received_reqeust_list.length>0){
+    received_reqeust_list.forEach((list) => {
+      pending_user_list.innerHTML += PendingRequest(list);
+    });
+  }
+  if (sent_request_list.length>0){
+    sent_request_list.forEach((list) => {
+      list.friend_info['sent'] = true;
+      user_list.innerHTML += PendingRequest(list);
+    });
+  }
 
-  // console.log(active_connection);
+  document.querySelectorAll('.accept-request').forEach((element) => {
+    element.addEventListener('click', async (event) => {
+      const connection_id = event.target.getAttribute('data-friend-id');
+      await acceptRequest(connection_id);
+      window.location.reload();
+    });
+  });
+
+  document.querySelectorAll('.cancel-request').forEach((element) => {
+    element.addEventListener('click', async (event) => {
+      const connection_id = event.target.getAttribute('data-friend-id');
+      await cancelRequest(connection_id);
+      window.location.reload();
+    });
+  });
+
+  // if (pending_list.length>0){
+  //   pending_list.forEach((user) => {
+  //     pending_user_list.innerHTML += PendingRequest(user);
+  //   });
+
 
   await render(connection[0]);
   message_list.scrollTop = message_list.scrollHeight;
