@@ -7,7 +7,6 @@ verifyToken(localStorage.getItem('access_token')).then((response) => {
   }
 }
 );
-// console.log(verifyToken(localStorage.getItem('access_token')));
 document.getElementById('login-button').addEventListener('submit', async (event) => {
   event.preventDefault();
 });

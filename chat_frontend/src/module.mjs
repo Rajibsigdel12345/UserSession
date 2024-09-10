@@ -95,3 +95,42 @@ export const verifyToken = (token) => {
   });
   return response;
 }
+
+export const fetchUserList = async () => {
+  const response = await fetch(`${constant.USER_LIST}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    }
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue');
+    window.location.href = 'login.html';
+  }
+  else if (response.status != 200){
+    alert('Something went wrong');
+    return {};
+  }
+  return response.json();
+}
+
+export const addFriend = async (data) => {
+  const response = await fetch(`${constant.CONNECTION}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    },
+    body: JSON.stringify(data)
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue');
+    window.location.href = 'login.html';
+  }
+  else if (response.status != 200){
+    alert('Something went wrong');
+    return {};
+  }
+  return response.json();
+}

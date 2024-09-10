@@ -1,8 +1,9 @@
-import { getConnection,socketLogin,connectChat,getMessages, verifyToken } from "./module.mjs";
+import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend } from "./module.mjs";
 import ChatHeader from "../component/ChatHeader.js";
 import MessageList from "../component/MessageList.js";
 import FriendList from "../component/FriendList.js";
 import Loader from "../component/Loader.js";
+import UserList from "../component/UserList.js";
 
 const render = async (connection) => {
   
@@ -40,7 +41,6 @@ async function main(){
   message_list.innerHTML = Loader();
 
   await socketLogin(localStorage.getItem('access_token'));
-
   const connection = await getConnection();
   if(JSON.parse(sessionStorage.getItem('active_connection')) === null){
   sessionStorage.setItem('active_connection',JSON.stringify(connection[0]));
@@ -49,6 +49,14 @@ async function main(){
   connection.forEach((connection) => {
     friend_list.innerHTML += FriendList(connection);
   });
+  const user_list = document.getElementById('user-list');
+  const users = await fetchUserList();
+
+  if( users.length>0 ){
+    users.forEach((user) => {
+      user_list.innerHTML += UserList(user);
+    });
+  }
 
   // console.log(active_connection);
 
@@ -91,9 +99,13 @@ async function main(){
     }
     
   });
-
-
-
+  const add_friend = document.querySelectorAll('.add-friend'); 
+  add_friend.forEach((element) => {
+    element.addEventListener('click', async (event) => {
+      const friend_id = event.target.getAttribute('data-friend-id');
+      await addFriend(friend_id);
+    });
+  });
 
 }
 

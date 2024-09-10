@@ -13,7 +13,7 @@ body{
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
 }
 .chat-app .people-list {
-  min-height:70vh;
+  /* min-height:70vh; */
   width: 280px;
   position: absolute;
   left: 0;
@@ -219,7 +219,7 @@ body{
 
 @media only screen and (max-width: 767px) {
   .chat-app .people-list {
-      height: 465px;
+      /* height: 465px; */
       width: 100%;
       overflow-x: auto;
       background: #fff;
@@ -243,7 +243,7 @@ body{
 
 @media only screen and (min-width: 768px) and (max-width: 992px) {
   .chat-app .chat-list {
-      height: 650px;
+      /* height: 650px; */
       overflow-x: auto
   }
   .chat-app .chat-history {
@@ -254,7 +254,7 @@ body{
 
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 1) {
   .chat-app .chat-list {
-      height: 480px;
+      /* height: 480px; */
       overflow-x: auto
   }
   .chat-app .chat-history {
