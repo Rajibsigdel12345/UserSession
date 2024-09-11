@@ -5,7 +5,7 @@ export const getConnection = async () => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     }
   });
   if (response.status === 401 ){
@@ -20,7 +20,7 @@ export const getMessages = async (connection_id) => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     }
   });
   return response.json();
@@ -40,8 +40,7 @@ export const socketLogin = async (token) => {
   const loginSocket = new WebSocket(
     `${constant.SOCKET_LOGIN}?token=${token}&user_id=${user_id}`);
 loginSocket.onclose = function(e) {
-    localStorage.removeItem('access_token');
-    sessionStorage.removeItem('user_id');
+  document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     window.location.href = `login.html`;
 };
 }
@@ -101,7 +100,7 @@ export const fetchUserList = async () => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     }
   });
   if (response.status === 401 ){
@@ -121,7 +120,7 @@ export const addFriend = async (data) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     },
     body: JSON.stringify(data)
   });
@@ -141,7 +140,7 @@ export const pendingRequest = async (pending) => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     }
   });
   if (response.status === 401 ){
@@ -160,7 +159,7 @@ export const acceptRequest = async (id) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     },
   });
   if (response.status === 401 ){
@@ -179,7 +178,7 @@ export const cancelRequest = async (id) => {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      'Authorization': `Bearer ${getCookies('access_token')}`
     },
   });
   if (response.status === 401 ){
@@ -191,4 +190,14 @@ export const cancelRequest = async (id) => {
     return {};
   }
   return ;
+}
+
+export const getCookies = (key) => {
+  const cookies = document.cookie.split(';');
+  const cookieObj = {};
+  cookies.forEach((cookie) => {
+    const [key, value] = cookie.split('=');
+    cookieObj[key.trim()] = value;
+  });
+  return cookieObj[key]?cookieObj[key]:null;
 }

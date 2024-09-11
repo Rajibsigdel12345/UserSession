@@ -53,7 +53,7 @@ class ConnectionView(APIView):
     instance = self.get_object(request, pk=pk)
     if instance.connected:
       return Response({"message":"Connection already established"}, status=status.HTTP_400_BAD_REQUEST)
-    serializer = self.serializer_class(instance = instance, data=request.data, partial = True)
+    serializer = self.serializer_class(instance = instance, data=request.data, partial = True,context={'user':request.user})
     if serializer.is_valid():
       serializer.save()
       return Response(serializer.data, status=status.HTTP_200_OK)

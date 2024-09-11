@@ -1,12 +1,17 @@
-import { fetchUser, signUp } from './module.mjs';
+import { fetchUser, signUp,getCookies } from './module.mjs';
 import {verifyToken} from './module.mjs';
 
-verifyToken(localStorage.getItem('access_token')).then((response) => {
+if (getCookies('access_token'))
+  {
+    verifyToken(getCookies('access_token')).then((response) => {
   if (response==true){
     window.location.href = 'chat_app.html';
   }
 }
-);
+);}
+else{
+  sessionStorage.clear();
+}
 document.getElementById('login-button').addEventListener('submit', async (event) => {
   event.preventDefault();
 });
@@ -22,9 +27,9 @@ document.getElementById('login-button').addEventListener('click', async (event) 
   if (user === null) {
     return;
   }
+  document.cookie = `access_token=${user.access}; path=/`;
+  document.cookie = `refresh_token=${user.refresh}; path=/`;
   sessionStorage.setItem('user_id', user.user_id);
-  localStorage.setItem('access_token',user.access);
-  localStorage.setItem('refresh_token',user.refresh);
   const active_connection = sessionStorage.getItem('active_connection');
   console.log(active_connection);
   if (active_connection=='undefined'){
@@ -58,13 +63,4 @@ document.getElementById('signup-button').addEventListener('click', async (event)
   if (user === null) {
     return;
   }
-  // sessionStorage.setItem('user_id', user.user_id);
-  // localStorage.setItem('access_token',user.access);
-  // localStorage.setItem('refresh_token',user.refresh);
-  // const active_connection = sessionStorage.getItem('active_connection');
-  // console.log(active_connection);
-  // if (active_connection=='undefined'){
-  //   sessionStorage.setItem('active_connection',JSON.stringify(null));
-  // }
-  // window.location = 'chat_app.html';
 });

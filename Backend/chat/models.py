@@ -34,7 +34,7 @@ class Messages(models.Model):
     delete_for_all = models.BooleanField(default=False)
     
     def __str__(self)-> str:
-        return f"{self.sender} to {self.receiver}"
+        return f"{self.author.username} : {self.message[:20]}"
 
 class Groups(models.Model):
     name = models.CharField(max_length=100)

@@ -1,4 +1,4 @@
-import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend, pendingRequest, acceptRequest,cancelRequest } from "./module.mjs";
+import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend, pendingRequest, acceptRequest,cancelRequest,getCookies } from "./module.mjs";
 import ChatHeader from "../component/ChatHeader.js";
 import MessageList from "../component/MessageList.js";
 import FriendList from "../component/FriendList.js";
@@ -21,13 +21,16 @@ const render = async (connection) => {
     message_list.innerHTML += MessageList(message);
   });
   // document.getElementById('message-list').scrollTop = document.getElementById('message-list').scrollHeight;
-  document.getElementById(`${default_friend.connection_id}`).classList.add('active');
+  const default_list = document.getElementById(`${default_friend.connection_id}`)
+  if (default_list){
+    default_list.classList.add('active');
+  }
 
 }
 const getChatSocket = async (connection) => {
   const web_socket = {};
   connection.forEach(async connection => {
-    web_socket[connection.connection_id] = await connectChat(connection.connection_id,localStorage.getItem('access_token'));
+    web_socket[connection.connection_id] = await connectChat(connection.connection_id,getCookies('access_token'));
   });
   return web_socket;
 }
@@ -44,12 +47,12 @@ async function main(){
   const pending_user_list = document.getElementById('pending-user-list');
   pending_user_list.innerHTML = Loader();
 
-  await socketLogin(localStorage.getItem('access_token'));
+  await socketLogin(getCookies('access_token'));
   const connection = await getConnection();
   if(default_connection === null || default_connection === "undefined" ||default_connection === 'null'){
   sessionStorage.setItem('active_connection',JSON.stringify(connection[0]));
   }
-  console.log(sessionStorage.getItem('active_connection'));
+  
   friend_list.innerHTML = '';
   connection.forEach((connection) => {
     friend_list.innerHTML += FriendList(connection);
@@ -62,11 +65,6 @@ async function main(){
   // pending_list = pending_list.filter((list) => list.sender !== parseInt(sessionStorage.getItem('user_id')));
   pending_user_list.innerHTML = '';
   
-  if( users.length>0 ){
-    users.forEach((user) => {
-      user_list.innerHTML += UserList(user);
-    });
-  }
   
   if (received_reqeust_list.length>0){
     received_reqeust_list.forEach((list) => {
@@ -79,7 +77,11 @@ async function main(){
       user_list.innerHTML += PendingRequest(list);
     });
   }
-
+  if( users.length>0 ){
+    users.forEach((user) => {
+      user_list.innerHTML += UserList(user);
+    });
+  }
   document.querySelectorAll('.accept-request').forEach((element) => {
     element.addEventListener('click', async (event) => {
       const connection_id = event.target.getAttribute('data-friend-id');
