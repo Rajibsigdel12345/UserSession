@@ -228,19 +228,20 @@ export const logout = async () => {
   });
   if (response.status === 400 ){
     let message = await response.json();
-    alert(message.detail);
-    document.cookie = 'access_token=;  path=/;';
-    document.cookie = 'refresh_token=;  path=/;';
-    window.location.href = 'login.html';
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie += 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = `login.html`;
 
   }
   else if (response.status != 205){
+    alert('Something went wrong');
+    alert(response.status);
     return {};
   }
   else if (response.status === 205){
-    document.cookie = 'access_token=;  path=/;';
-    document.cookie = 'refresh_token=;  path=/;';
-    window.location.href = 'login.html';
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie += 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = `login.html`;
   }
   return ;
 }
