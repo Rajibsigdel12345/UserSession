@@ -2,16 +2,14 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from rest_framework.request import Request
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer, SignupSerializer 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from .models import AuthToken , User 
-from django.conf import settings
-from django.utils import timezone
+from .models import  User 
 from rest_framework_simplejwt.tokens import RefreshToken 
 # Create your views here.
 class UserVerifyView(APIView):
@@ -32,7 +30,7 @@ class UserVerifyView(APIView):
   #   return Response({'message': 'Token is deleted'}, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
-  # authentication_classes = [JWTAuthentication]
+  authentication_classes = [JWTAuthentication]
   permission_classes= [IsAuthenticated]
   def post(self, request):
         # Get the refresh token from the request
@@ -63,9 +61,7 @@ class UserLoginView(TokenObtainPairView):
     return response
     
   
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.response import Response
-from rest_framework.views import APIView
+
 
 class TokenRefreshView(APIView):
     def post(self, request, *args, **kwargs):
