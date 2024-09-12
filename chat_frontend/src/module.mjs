@@ -229,9 +229,12 @@ export const logout = async () => {
   if (response.status === 400 ){
     let message = await response.json();
     alert(message.detail);
+    document.cookie = 'access_token=;  path=/;';
+    document.cookie = 'refresh_token=;  path=/;';
+    window.location.href = 'login.html';
+
   }
   else if (response.status != 205){
-    alert('Something went wrong');
     return {};
   }
   else if (response.status === 205){
@@ -243,7 +246,6 @@ export const logout = async () => {
 }
 
 export const refresh = async () => {
-  alert('refresh');
   const response = await fetch(`${constant.REFRESH}`, {
     method: 'POST',
     headers: {
@@ -256,13 +258,12 @@ export const refresh = async () => {
   if (response.status === 401 || response.status === 403){
     alert('Please login to continue inside refresh');
   }
-  else if (response.status != 200){
+  else if (response.ok != true){
     alert('Something went wrong');
     return {};
   }
   else if (response.status === 200){
     const data = await response.json();
     document.cookie = 'access_token='+data.access+'; path=/';
-    alert("Token refreshed");
   }
 }
