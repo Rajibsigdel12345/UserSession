@@ -27,3 +27,4 @@ class SignupSerializer(serializers.ModelSerializer):
         }
         user = User.objects.create_user(**data)
         return user
+

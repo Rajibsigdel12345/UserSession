@@ -67,6 +67,7 @@ class User(AbstractBaseUser):
             'email':self.email,
             'first_name':self.first_name,
             'last_name':self.last_name,
+            'profile_url':self.profile_url,
         }
 
 

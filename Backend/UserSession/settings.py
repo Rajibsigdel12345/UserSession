@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
     'channels',
     'chat',
   
@@ -56,6 +57,9 @@ CHANNEL_LAYERS = {
     },
 }
 AUTH_USER_MODEL = 'authentication.User'
+SIMPLE_JWT = {
+    'BLACKLIST_AFTER_EXPIRATION': True,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
