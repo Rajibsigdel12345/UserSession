@@ -1,25 +1,36 @@
-import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend, pendingRequest, acceptRequest,cancelRequest,getCookies } from "./module.mjs";
+import { getConnection,socketLogin,connectChat,getMessages, verifyToken,fetchUserList, addFriend, pendingRequest, acceptRequest,cancelRequest,getCookies,myProfile, logout,refresh } from "./module.mjs";
 import ChatHeader from "../component/ChatHeader.js";
 import MessageList from "../component/MessageList.js";
 import FriendList from "../component/FriendList.js";
 import Loader from "../component/Loader.js";
 import UserList from "../component/UserList.js";
 import PendingRequest from "../component/PendingRequest.js";
+import User from "../component/User.js";
+
+window.onbeforeunload = await refresh();
 
 const render = async (connection) => {
-  console.log(sessionStorage.getItem('active_connection'));
+  const chat_header = document.getElementById('chat-header');
+  const message_list = document.getElementById('message-list');
+  
+  if (sessionStorage.getItem('active_connection') === null || sessionStorage.getItem('active_connection') === 'undefined' || sessionStorage.getItem('active_connection') === 'null'){
+    chat_header.innerHTML = ChatHeader(connection);
+  }
   const default_friend = JSON.stringify(sessionStorage.getItem('active_connection')) ? JSON.parse(sessionStorage.getItem('active_connection')) : connection;
   
-  const chat_header = document.getElementById('chat-header');
   chat_header.innerHTML = ChatHeader(default_friend);
 
+ if (default_friend.connection_id){
   
-  const message_list = document.getElementById('message-list');
-  const messages = await getMessages(default_friend.connection_id);
-  message_list.innerHTML = '';
-  messages.forEach((message) => {
+    const messages = await getMessages(default_friend.connection_id??"");
+    message_list.innerHTML = '';
+    messages.forEach((message) => {
     message_list.innerHTML += MessageList(message);
   });
+}else{
+    message_list.innerHTML = '';
+  }
+  message_list.scrollTop = message_list.scrollHeight;
   // document.getElementById('message-list').scrollTop = document.getElementById('message-list').scrollHeight;
   const default_list = document.getElementById(`${default_friend.connection_id}`)
   if (default_list){
@@ -46,18 +57,27 @@ async function main(){
   message_list.innerHTML = Loader();
   const pending_user_list = document.getElementById('pending-user-list');
   pending_user_list.innerHTML = Loader();
+  const user_list = document.getElementById('user-list');
+  user_list.innerHTML = Loader();
+  const my_profile = document.getElementById('profile');
+  const my_profile_data =  await myProfile();
+  my_profile.innerHTML = User(my_profile_data);
 
   await socketLogin(getCookies('access_token'));
   const connection = await getConnection();
   if(default_connection === null || default_connection === "undefined" ||default_connection === 'null'){
+    if (connection.length>0){
   sessionStorage.setItem('active_connection',JSON.stringify(connection[0]));
   }
+  else{
+    sessionStorage.setItem('active_connection',null);
+  }
+}
   
   friend_list.innerHTML = '';
   connection.forEach((connection) => {
     friend_list.innerHTML += FriendList(connection);
   });
-  const user_list = document.getElementById('user-list');
   const users = await fetchUserList();
   
   let received_reqeust_list = await pendingRequest(false);
@@ -71,6 +91,7 @@ async function main(){
       pending_user_list.innerHTML += PendingRequest(list);
     });
   }
+  user_list.innerHTML = '';
   if (sent_request_list.length>0){
     sent_request_list.forEach((list) => {
       list.friend_info['sent'] = true;
@@ -97,6 +118,12 @@ async function main(){
       window.location.reload();
     });
   });
+  document.getElementById('logout').addEventListener('click', async (event) => {
+    await logout();
+    window.location.href = 'login.html';
+
+  }
+  );
 
   // if (pending_list.length>0){
   //   pending_list.forEach((user) => {
@@ -152,6 +179,7 @@ async function main(){
         receiver: parseInt(friend_id)
       }
       await addFriend(data);
+      window.location.reload();
     });
   });
 

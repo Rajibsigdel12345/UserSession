@@ -1,5 +1,5 @@
 const ChatHeader = (props) => {
-  const username = props.friend_info?.username ?? 'Unknown';
+  const username = props?.friend_info?.username ?? 'Unknown';
 
   return`
                         <div class="row">

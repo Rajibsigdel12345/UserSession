@@ -26,6 +26,9 @@ body{
   margin-left: 280px;
   border-left: 1px solid #eaeaea
 }
+#logout{
+  float: right;
+}
 
 .people-list {
   -moz-transition: .5s;

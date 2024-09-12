@@ -9,7 +9,7 @@ export const getConnection = async () => {
     }
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
+    alert('Please login to continue inside get connection');
     return {}
   }
   return response.json();
@@ -41,6 +41,7 @@ export const socketLogin = async (token) => {
     `${constant.SOCKET_LOGIN}?token=${token}&user_id=${user_id}`);
 loginSocket.onclose = function(e) {
   document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie += 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     window.location.href = `login.html`;
 };
 }
@@ -104,8 +105,7 @@ export const fetchUserList = async () => {
     }
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
-    window.location.href = 'login.html';
+    alert('Please login to continue inside fetch user list');
   }
   else if (response.status != 200){
     alert('Something went wrong');
@@ -125,8 +125,7 @@ export const addFriend = async (data) => {
     body: JSON.stringify(data)
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
-    window.location.href = 'login.html';
+    alert('Please login to continue inside add friend');
   }
   else if (response.status != 201){
     alert('Something went wrong');
@@ -144,8 +143,7 @@ export const pendingRequest = async (pending) => {
     }
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
-    window.location.href = 'login.html';
+    alert('Please login to continue inside pending request');
   }
   else if (response.status != 200){
     alert('Something went wrong');
@@ -163,8 +161,7 @@ export const acceptRequest = async (id) => {
     },
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
-    window.location.href = 'login.html';
+    alert('Please login to continue inside accept request');
   }
   else if (response.status != 200){
     alert('Something went wrong');
@@ -182,8 +179,7 @@ export const cancelRequest = async (id) => {
     },
   });
   if (response.status === 401 ){
-    alert('Please login to continue');
-    window.location.href = 'login.html';
+    alert('Please login to continue inside cancel request');
   }
   else if (response.status != 204){
     alert('Something went wrong');
@@ -200,4 +196,73 @@ export const getCookies = (key) => {
     cookieObj[key.trim()] = value;
   });
   return cookieObj[key]?cookieObj[key]:null;
+}
+
+export const myProfile = async () => {
+  const response = await fetch(`${constant.MY_PROFILE}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getCookies('access_token')}`
+    }
+  });
+  if (response.status === 401 ){
+    alert('Please login to continue inside my profile');
+  }
+  else if (response.status != 200){
+    alert('Something went wrong');
+    return {};
+  }
+  return response.json();
+}
+
+export const logout = async () => {
+  const response = await fetch(`${constant.LOGOUT}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getCookies('access_token')}`
+    }
+    ,
+    body: JSON.stringify({refresh_token: getCookies('refresh_token')})
+  });
+  if (response.status === 400 ){
+    let message = await response.json();
+    alert(message.detail);
+  }
+  else if (response.status != 205){
+    alert('Something went wrong');
+    return {};
+  }
+  else if (response.status === 205){
+    document.cookie = 'access_token=;  path=/;';
+    document.cookie = 'refresh_token=;  path=/;';
+    window.location.href = 'login.html';
+  }
+  return ;
+}
+
+export const refresh = async () => {
+  alert('refresh');
+  const response = await fetch(`${constant.REFRESH}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getCookies('access_token')}`
+    }
+    ,
+    body: JSON.stringify({refresh: getCookies('refresh_token')})
+  });
+  if (response.status === 401 || response.status === 403){
+    alert('Please login to continue inside refresh');
+  }
+  else if (response.status != 200){
+    alert('Something went wrong');
+    return {};
+  }
+  else if (response.status === 200){
+    const data = await response.json();
+    document.cookie = 'access_token='+data.access+'; path=/';
+    alert("Token refreshed");
+  }
 }
